@@ -1,0 +1,126 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+struct Student 
+{
+    string name;
+    int age;
+    string grade;
+};
+
+void addStudent();
+void viewStudents();
+void updateStudent();
+
+int main() {
+    char choice;
+    do {
+        cout << "Student Database Management System" << endl;
+        cout << "1. Add Student\n2. View Students\n3. Update Student\n4. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        
+        switch(choice) {
+            case '1':
+                addStudent();
+                break;
+            case '2':
+                viewStudents();
+                break;
+            case '3':
+                updateStudent();
+                break;
+            case '4':
+                cout << "Exiting program...";
+                break;
+            default:
+                cout << "Invalid choice! Please try again.";
+        }
+        cout << endl;
+    } while(choice != '4');
+
+    return 0;
+}
+
+void addStudent() {
+    Student newStudent;
+    ofstream outFile("students.txt", ios::app);
+
+    cout << "Enter name: ";
+    cin.ignore();
+    getline(cin, newStudent.name);
+    cout << "Enter age: ";
+    cin >> newStudent.age;
+    cout << "Enter grade: ";
+    cin.ignore();
+    getline(cin, newStudent.grade);
+
+    outFile << newStudent.name << "," << newStudent.age << "," << newStudent.grade << endl;
+
+    cout << "Student record added successfully!" << endl;
+
+    outFile.close();
+}
+
+// Function to view all student records
+void viewStudents() {
+    ifstream inFile("students.txt");
+    string line;
+
+    cout << "Student Records:" << endl;
+
+    while (getline(inFile, line)) {
+        cout << line << endl;
+    }
+
+    inFile.close();
+}
+
+// Function to update a student's information
+void updateStudent() {
+    string nameToUpdate, newName, newGrade;
+    int newAge;
+    ifstream inFile("students.txt");
+    ofstream tempFile("temp.txt");
+    string line;
+
+    cout << "Enter the name of the student to update: ";
+    cin.ignore();
+    getline(cin, nameToUpdate);
+
+    cout << "Enter new name: ";
+    getline(cin, newName);
+    cout << "Enter new age: ";
+    cin >> newAge;
+    cout << "Enter new grade: ";
+    cin.ignore();
+    getline(cin, newGrade);
+
+    bool updated = false;
+
+    while (getline(inFile, line)) {
+        size_t pos = line.find(',');
+        string name = line.substr(0, pos);
+
+        if (name == nameToUpdate) {
+            tempFile << newName << "," << newAge << "," << newGrade << endl;
+            updated = true;
+        } else {
+            tempFile << line << endl;
+        }
+    }
+
+    inFile.close();
+    tempFile.close();
+
+    remove("students.txt");
+    rename("temp.txt", "students.txt");
+
+    if (updated)
+        cout << "Student information updated successfully!" << endl;
+    else
+        cout << "Student not found in the database." << endl;
+}
